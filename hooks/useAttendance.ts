@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from "react";
 import type {
   AttendanceRecord,
   AttendanceSummary,
+  AttendanceStatus,
   FilterState,
 } from "@/types/attendance";
 
@@ -79,6 +80,8 @@ const staticRecords: AttendanceRecord[] = [
   },
 ];
 
+let nextId = 16;
+
 function computeSummary(recs: AttendanceRecord[]): AttendanceSummary {
   return {
     total: recs.length,
@@ -87,6 +90,25 @@ function computeSummary(recs: AttendanceRecord[]): AttendanceSummary {
     late: recs.filter((r) => r.status === "Late").length,
     onLeave: recs.filter((r) => r.status === "On Leave").length,
   };
+}
+
+export interface AddEmployeeData {
+  name: string;
+  gender: string;
+  contact: string;
+  rollNo: string;
+  standard: string;
+  status: AttendanceStatus;
+  punchIn: string;
+  punchOut: string;
+}
+
+export interface EditRecordData {
+  name: string;
+  contact: string;
+  status: AttendanceStatus;
+  punchIn: string;
+  punchOut: string;
 }
 
 export function useAttendance() {
@@ -112,6 +134,56 @@ export function useAttendance() {
           : r
       )
     );
+  }, []);
+
+  // ── Add Employee ──────────────────────────────────────────────────
+  const addEmployee = useCallback((data: AddEmployeeData) => {
+    const id = String(nextId++);
+    const code = `STU${id.padStart(3, "0")}`;
+
+    const newRecord: AttendanceRecord = {
+      student: {
+        id,
+        code,
+        name: data.name,
+        gender: data.gender,
+        contact: data.contact,
+        rollNo: data.rollNo,
+        standard: data.standard,
+      },
+      date: today,
+      punchIn: data.punchIn || null,
+      punchOut: data.punchOut || null,
+      serialNumber: "DEV-001",
+      status: data.status,
+      logCount: data.punchIn ? (data.punchOut ? 2 : 1) : 0,
+    };
+
+    setRecords((prev) => [newRecord, ...prev]);
+    setPage(0);
+  }, []);
+
+  // ── Edit Record ───────────────────────────────────────────────────
+  const editRecord = useCallback((studentCode: string, data: EditRecordData) => {
+    setRecords((prev) =>
+      prev.map((r) =>
+        r.student.code === studentCode
+          ? {
+              ...r,
+              student: { ...r.student, name: data.name, contact: data.contact },
+              status: data.status,
+              punchIn: data.punchIn || null,
+              punchOut: data.punchOut || null,
+              logCount: data.punchIn ? (data.punchOut ? 2 : 1) : 0,
+            }
+          : r
+      )
+    );
+  }, []);
+
+  // ── Delete Record ─────────────────────────────────────────────────
+  const deleteRecord = useCallback((studentCode: string) => {
+    setRecords((prev) => prev.filter((r) => r.student.code !== studentCode));
   }, []);
 
   const updateFilter = useCallback((patch: Partial<FilterState>) => {
@@ -141,6 +213,7 @@ export function useAttendance() {
 
   return {
     records: paged,
+    allRecords: records,
     summary: filteredSummary,
     filter,
     updateFilter,
@@ -153,5 +226,8 @@ export function useAttendance() {
     setPage,
     sync,
     markLeave,
+    addEmployee,
+    editRecord,
+    deleteRecord,
   };
 }

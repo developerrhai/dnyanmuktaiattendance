@@ -1,9 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { useAttendance } from "@/hooks/useAttendance";
 import { StatCards } from "@/components/attendance/StatCards";
 import { FilterBar } from "@/components/attendance/FilterBar";
 import { AttendanceTable } from "@/components/attendance/AttendanceTable";
+import { AddEmployeeModal } from "@/components/attendance/AddEmployeeModal";
+import { EditRecordModal } from "@/components/attendance/EditRecordModal";
+import { DeleteConfirmModal } from "@/components/attendance/DeleteConfirmModal";
+import type { AttendanceRecord } from "@/types/attendance";
 
 export default function AttendancePage() {
   const {
@@ -20,7 +25,14 @@ export default function AttendancePage() {
     setPage,
     sync,
     markLeave,
+    addEmployee,
+    editRecord,
+    deleteRecord,
   } = useAttendance();
+
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<AttendanceRecord | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AttendanceRecord | null>(null);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -42,6 +54,15 @@ export default function AttendancePage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg>
             {syncing ? "Syncing..." : "Sync Biometric"}
+          </button>
+          <button
+            onClick={() => setIsAddOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Employee
           </button>
           <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -111,8 +132,29 @@ export default function AttendancePage() {
           totalFiltered={totalFiltered}
           onPageChange={setPage}
           onMarkLeave={markLeave}
+          onEdit={setEditTarget}
+          onDelete={setDeleteTarget}
         />
       </div>
+
+      {/* Modals */}
+      <AddEmployeeModal
+        open={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        onSubmit={addEmployee}
+      />
+      <EditRecordModal
+        open={!!editTarget}
+        record={editTarget}
+        onClose={() => setEditTarget(null)}
+        onSubmit={editRecord}
+      />
+      <DeleteConfirmModal
+        open={!!deleteTarget}
+        record={deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={deleteRecord}
+      />
     </div>
   );
 }

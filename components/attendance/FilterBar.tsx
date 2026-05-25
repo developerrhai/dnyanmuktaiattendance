@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import type { FilterState, AttendanceStatus } from "@/types/attendance";
 
 interface Props {
@@ -25,6 +26,9 @@ function formatSyncTime(iso: string) {
 }
 
 export function FilterBar({ filter, onChange, onSync, syncing, syncedAt }: Props) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   return (
     <div className="px-5 py-4 border-b border-gray-100 flex flex-wrap gap-3 items-center">
       <div className="relative flex-1 min-w-[200px]">
@@ -71,7 +75,7 @@ export function FilterBar({ filter, onChange, onSync, syncing, syncedAt }: Props
         {syncing ? "Syncing..." : "Sync Biometric"}
       </button>
 
-      {syncedAt && (
+      {mounted && syncedAt && (
         <p className="text-xs text-gray-400 ml-auto">
           Last synced: {formatSyncTime(syncedAt)}
         </p>
