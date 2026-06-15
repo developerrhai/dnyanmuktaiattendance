@@ -40,6 +40,16 @@ export interface AddEmployeeData {
   punchOut: string;
 }
 
+export interface BiometricUploadOptions {
+  cardNumber?: string;
+  serialNumbers?: string; // comma-separated; defaults to configured device(s) on the backend
+  verifyMode?: string;    // e.g. "1" for face+card dual verification
+  isFaceUpload?: boolean;
+  isFPUpload?: boolean;
+  isCardUpload?: boolean;
+  isBioPasswordUpload?: boolean;
+}
+
 export interface EditRecordData {
   name: string;
   contact: string;
@@ -55,6 +65,7 @@ export function useAttendance() {
   const [syncedAt, setSyncedAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
+  const [biometricImportCode, setBiometricImportCode] = useState<string | null>(null);
 
   const PER_PAGE = 10;
 
@@ -241,6 +252,42 @@ export function useAttendance() {
     }
   }, [filter.date, fetchAttendance]);
 
+  // ── Import / Register Student on Biometric Device ────────────────
+  const importToBiometric = useCallback(
+    async (studentCode: string, options?: BiometricUploadOptions) => {
+      setError(null);
+      setBiometricImportCode(studentCode);
+      try {
+        const res = await fetch(`${API_BASE}/biometric/upload-user`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            studentCode,
+            cardNumber: options?.cardNumber,
+            serialNumbers: options?.serialNumbers,
+            verifyMode: options?.verifyMode,
+            isFaceUpload: options?.isFaceUpload,
+            isFPUpload: options?.isFPUpload,
+            isCardUpload: options?.isCardUpload,
+            isBioPasswordUpload: options?.isBioPasswordUpload,
+          }),
+        });
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || "Failed to register student on the biometric device.");
+        }
+        return await res.json();
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message || "Failed to register student on the biometric device.");
+        throw err;
+      } finally {
+        setBiometricImportCode(null);
+      }
+    },
+    []
+  );
+
   const updateFilter = useCallback((patch: Partial<FilterState>) => {
     setFilter((prev) => ({ ...prev, ...patch }));
     setPage(0);
@@ -284,6 +331,7 @@ export function useAttendance() {
     addEmployee,
     editRecord,
     deleteRecord,
+    importToBiometric,
+    biometricImportCode,
   };
 }
-

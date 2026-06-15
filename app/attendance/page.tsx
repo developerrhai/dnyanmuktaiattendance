@@ -29,6 +29,8 @@ export default function AttendancePage() {
     addEmployee,
     editRecord,
     deleteRecord,
+    importToBiometric,
+    biometricImportCode,
   } = useAttendance();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -167,6 +169,8 @@ export default function AttendancePage() {
           onMarkLeave={markLeave}
           onEdit={setEditTarget}
           onDelete={setDeleteTarget}
+          onImportToBiometric={importToBiometric}
+          importingCode={biometricImportCode}
         />
       </div>
 
