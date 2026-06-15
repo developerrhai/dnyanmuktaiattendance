@@ -1,0 +1,32 @@
+{
+  "name": "attendance-module",
+  "version": "1.0.0",
+  "description": "Biometric attendance integration for your Institute Management System using the SmartOffice API.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "next": "^16.2.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.4.4",
+    "typescript": "6.0.3"
+  }
+}
