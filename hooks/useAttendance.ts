@@ -16,7 +16,7 @@ const defaultFilter: FilterState = {
   date: today,
 };
 
-const API_BASE = "https://absolutefoundationattend.rhaitech.online/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://absolutefoundationattend.rhaitech.online/api";
 
 function computeSummary(recs: AttendanceRecord[]): AttendanceSummary {
   return {
@@ -96,7 +96,12 @@ export function useAttendance() {
   try {
     const res = await fetch(`${API_BASE}/attendance?date=${targetDate}`);
     if (!res.ok) {
-      const errData = await res.json();
+      let errData;
+      try {
+        errData = await res.json();
+      } catch {
+        throw new Error(`Server returned a non-JSON error (status ${res.status}). Ensure the backend is running properly.`);
+      }
       throw new Error(errData.error || "Failed to fetch attendance.");
     }
     const data = await res.json();
@@ -142,7 +147,12 @@ export function useAttendance() {
         body: JSON.stringify({ date: d }),
       });
       if (!res.ok) {
-        const errData = await res.json();
+        let errData;
+        try {
+          errData = await res.json();
+        } catch {
+          throw new Error(`Server returned a non-JSON error (status ${res.status}).`);
+        }
         throw new Error(errData.error || "Sync failed.");
       }
       const data = await res.json();
@@ -166,7 +176,12 @@ export function useAttendance() {
         body: JSON.stringify({ studentCode, date: filter.date }),
       });
       if (!res.ok) {
-        const errData = await res.json();
+        let errData;
+        try {
+          errData = await res.json();
+        } catch {
+          throw new Error(`Server returned a non-JSON error (status ${res.status}).`);
+        }
         throw new Error(errData.error || "Failed to mark leave.");
       }
       setRecords((prev) =>
@@ -199,7 +214,12 @@ export function useAttendance() {
         }),
       });
       if (!res.ok) {
-        const errData = await res.json();
+        let errData;
+        try {
+          errData = await res.json();
+        } catch {
+          throw new Error(`Server returned a non-JSON error (status ${res.status}). The deployed API might be crashing.`);
+        }
         throw new Error(errData.error || "Failed to add student.");
       }
 
@@ -237,7 +257,12 @@ export function useAttendance() {
         body: JSON.stringify({ name: data.name, contact: data.contact }),
       });
       if (!studentRes.ok) {
-        const errData = await studentRes.json();
+        let errData;
+        try {
+          errData = await studentRes.json();
+        } catch {
+          throw new Error(`Server returned a non-JSON error (status ${studentRes.status}).`);
+        }
         throw new Error(errData.error || "Failed to update student profile.");
       }
 
@@ -254,7 +279,12 @@ export function useAttendance() {
         }),
       });
       if (!attendanceRes.ok) {
-        const errData = await attendanceRes.json();
+        let errData;
+        try {
+          errData = await attendanceRes.json();
+        } catch {
+          throw new Error(`Server returned a non-JSON error (status ${attendanceRes.status}).`);
+        }
         throw new Error(errData.error || "Failed to update attendance record.");
       }
 
@@ -273,7 +303,12 @@ export function useAttendance() {
         method: "DELETE",
       });
       if (!res.ok) {
-        const errData = await res.json();
+        let errData;
+        try {
+          errData = await res.json();
+        } catch {
+          throw new Error(`Server returned a non-JSON error (status ${res.status}).`);
+        }
         throw new Error(errData.error || "Failed to delete student.");
       }
       await fetchAttendance(filter.date);
@@ -304,7 +339,12 @@ export function useAttendance() {
           }),
         });
         if (!res.ok) {
-          const errData = await res.json();
+          let errData;
+          try {
+            errData = await res.json();
+          } catch {
+            throw new Error(`Server returned a non-JSON error (status ${res.status}).`);
+          }
           throw new Error(errData.error || "Failed to register student on the biometric device.");
         }
         return await res.json();
