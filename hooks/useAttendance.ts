@@ -16,7 +16,7 @@ const defaultFilter: FilterState = {
   date: today,
 };
 
-const API_BASE = "https://absolutefoundationattend.rhaitech.online/api"; // Temporarily pointing to local backend to bypass the EC2 crash
+const API_BASE = "https://dnyanmuktaifoundationatten.rhaitech.online/api"; // Temporarily pointing to local backend to bypass the EC2 crash
 
 function computeSummary(recs: AttendanceRecord[]): AttendanceSummary {
   return {
