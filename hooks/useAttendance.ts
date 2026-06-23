@@ -383,7 +383,7 @@ export function useAttendance() {
   );
 
   // ── Notify WhatsApp ───────────────────────────────────────────────
-  const notifyWhatsApp = useCallback(async (targetDate?: string) => {
+  const notifyWhatsApp = useCallback(async (targetDate?: string, includeLate = false): Promise<{success: boolean; message: string; summary?: Record<string, number>} | null> => {
     const d = targetDate || filter.date;
     setNotifyingWhatsApp(true);
     setError(null);
@@ -391,7 +391,7 @@ export function useAttendance() {
       const res = await fetch(`${API_BASE}/attendance/notify-whatsapp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date: d }),
+        body: JSON.stringify({ date: d, includeLate }),
       });
       if (!res.ok) {
         let errData;
@@ -403,14 +403,16 @@ export function useAttendance() {
         throw new Error(errData.error || "Failed to notify WhatsApp.");
       }
       const data = await res.json();
-      alert(data.message); // Simple alert to notify success summary
+      return data; // Return data so callers can show a proper modal
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Failed to notify WhatsApp.");
+      return null;
     } finally {
       setNotifyingWhatsApp(false);
     }
   }, [filter.date]);
+
 
   // ── Filter & Pagination ───────────────────────────────────────────
   const updateFilter = useCallback((patch: Partial<FilterState>) => {
